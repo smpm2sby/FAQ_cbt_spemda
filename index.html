@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FAQ CBT SMP Muhammadiyah 2 Surabaya</title>
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <script>
@@ -20,20 +21,15 @@
         }
     </script>
     <style>
-        /* Styling khusus untuk animasi accordion */
-        details > summary {
-            list-style: none;
-        }
-        details > summary::-webkit-details-marker {
-            display: none;
-        }
-        details[open] summary ~ * {
-            animation: slideDown 0.3s ease-in-out;
-        }
+        /* Animasi Accordion */
+        details > summary { list-style: none; }
+        details > summary::-webkit-details-marker { display: none; }
+        details[open] summary ~ * { animation: slideDown 0.3s ease-in-out; }
         @keyframes slideDown {
             from { opacity: 0; transform: translateY(-10px); }
             to { opacity: 1; transform: translateY(0); }
         }
+        /* Loader */
         .loader {
             border: 4px solid #f3f3f3;
             border-top: 4px solid #0056b3;
@@ -46,16 +42,20 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
+        /* Styling untuk cetak tebal (Bold) dari tag <b> agar terbaca di Tailwind */
+        .faq-content b, .faq-content strong {
+            font-weight: 700 !important;
+            color: #1a202c;
+        }
     </style>
 </head>
 <body class="bg-bg-soft font-sans text-gray-800 min-h-screen flex flex-col">
 
+    <!-- Header / Navbar -->
     <header class="bg-white shadow-md sticky top-0 z-50">
         <div class="max-w-4xl mx-auto px-4 py-4 flex items-center gap-4">
             <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e6/Muhammadiyah_logo.svg/1024px-Muhammadiyah_logo.svg.png" 
-                 alt="Logo Sekolah" 
-                 class="h-12 w-12 object-contain">
-            
+                 alt="Logo Sekolah" class="h-12 w-12 object-contain">
             <div>
                 <h1 class="text-xl md:text-2xl font-bold text-muha-blue leading-tight">FAQ CBT</h1>
                 <p class="text-sm md:text-base text-gray-600 font-medium">SMP Muhammadiyah 2 Surabaya</p>
@@ -63,42 +63,64 @@
         </div>
     </header>
 
+    <!-- Main Content -->
     <main class="flex-grow max-w-4xl w-full mx-auto px-4 py-8">
         
+        <!-- Search Bar -->
         <div class="mb-8 relative">
             <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                 <i class="fas fa-search text-gray-400"></i>
             </div>
-            <input type="text" 
-                   id="searchInput" 
-                   placeholder="Ketik kata kunci masalah Anda... (Cth: password, login, error)" 
+            <input type="text" id="searchInput" placeholder="Ketik kata kunci masalah Anda... (Cth: putih, blank, wifi)" 
                    class="w-full pl-12 pr-4 py-4 rounded-xl border-2 border-transparent focus:border-muha-yellow focus:ring-0 shadow-sm text-lg transition-all"
                    onkeyup="filterFAQ()">
         </div>
 
+        <!-- Area Pesan Loading/Error -->
         <div id="statusMessage" class="flex justify-center items-center py-10">
             <div class="loader mr-3"></div>
-            <p class="text-gray-500 font-medium">Memuat FAQ terbaru dari server...</p>
+            <p class="text-gray-500 font-medium">Memuat FAQ terbaru...</p>
         </div>
 
-        <div id="faqContainer" class="space-y-4 hidden">
-            </div>
+        <!-- Container FAQ List -->
+        <div id="faqContainer" class="space-y-4 hidden"></div>
 
+        <!-- Admin Panel -->
         <div id="adminPanel" class="mt-12 bg-white rounded-xl shadow-lg border-t-4 border-muha-blue p-6 hidden">
             <div class="flex justify-between items-center mb-6">
-                <h2 class="text-xl font-bold text-muha-blue"><i class="fas fa-tools mr-2"></i>Panel Admin: Tambah FAQ</h2>
-                <button onclick="logoutAdmin()" class="text-red-500 hover:bg-red-50 px-3 py-1 rounded text-sm font-bold transition">Logout</button>
+                <h2 id="formTitle" class="text-xl font-bold text-muha-blue"><i class="fas fa-tools mr-2"></i>Panel Admin: Tambah FAQ</h2>
+                <div>
+                    <button id="btnCancelEdit" onclick="cancelEdit()" class="text-gray-500 hover:bg-gray-100 px-3 py-1 rounded text-sm font-bold transition mr-2 hidden">Batal Edit</button>
+                    <button onclick="logoutAdmin()" class="text-red-500 hover:bg-red-50 px-3 py-1 rounded text-sm font-bold transition">Logout</button>
+                </div>
             </div>
             
-            <form id="formAddFaq" onsubmit="submitFaq(event)">
+            <form id="formFaq" onsubmit="submitFaq(event)">
+                <input type="hidden" id="editFaqId" value="">
+                
                 <div class="mb-4">
                     <label class="block text-gray-700 font-bold mb-2">Pertanyaan (Masalah)</label>
                     <input type="text" id="inputPertanyaan" required class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-muha-blue">
                 </div>
-                <div class="mb-6">
-                    <label class="block text-gray-700 font-bold mb-2">Solusi (Penyelesaian)</label>
-                    <textarea id="inputSolusi" required rows="4" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-muha-blue"></textarea>
+                
+                <!-- Field Penyebab dengan tombol Bold -->
+                <div class="mb-4">
+                    <div class="flex justify-between items-center mb-2">
+                        <label class="block text-gray-700 font-bold">Penyebab</label>
+                        <button type="button" onclick="insertBold('inputPenyebab')" class="text-sm bg-gray-200 hover:bg-gray-300 text-gray-800 px-3 py-1 rounded font-bold border border-gray-300" title="Cetak Tebal (Bold)">B</button>
+                    </div>
+                    <textarea id="inputPenyebab" rows="3" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-muha-blue" placeholder="Opsional: Tuliskan penyebab masalah..."></textarea>
                 </div>
+
+                <!-- Field Solusi dengan tombol Bold -->
+                <div class="mb-6">
+                    <div class="flex justify-between items-center mb-2">
+                        <label class="block text-gray-700 font-bold">Solusi (Penyelesaian)</label>
+                        <button type="button" onclick="insertBold('inputSolusi')" class="text-sm bg-gray-200 hover:bg-gray-300 text-gray-800 px-3 py-1 rounded font-bold border border-gray-300" title="Cetak Tebal (Bold)">B</button>
+                    </div>
+                    <textarea id="inputSolusi" required rows="4" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-muha-blue" placeholder="Tuliskan solusi penyelesaiannya..."></textarea>
+                </div>
+
                 <button type="submit" id="btnSubmit" class="w-full bg-muha-blue hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition-colors flex justify-center items-center">
                     <span>Simpan FAQ ke Database</span>
                 </button>
@@ -107,6 +129,7 @@
         </div>
     </main>
 
+    <!-- Footer -->
     <footer class="bg-white border-t py-6 text-center text-sm text-gray-500">
         <p>&copy; 2026 SMP Muhammadiyah 2 Surabaya. All rights reserved.</p>
         <button type="button" onclick="promptLogin()" class="mt-2 text-gray-200 hover:text-gray-400 transition-colors cursor-pointer block mx-auto">
@@ -114,74 +137,107 @@
         </button>
     </footer>
 
+    <!-- JS Logic -->
     <script>
         // =========================================================================
         // PENTING: MASUKKAN URL GOOGLE APPS SCRIPT WEB APP ANDA DI SINI!
         // =========================================================================
-        const GAS_URL = "https://script.google.com/macros/s/AKfycbwpfioRb3sJjWgjYxz3s1M1rA62o30SFa-XaBMMCKJD3FKloTXR-7Zxugb-bytn_pnUuQ/exec";
+        const GAS_URL = "ISI_DENGAN_URL_WEB_APP_GOOGLE_SCRIPT_ANDA_DI_SINI";
         
         let faqsData = [];
         let isAdmin = false;
 
-        // Saat halaman dimuat, ambil data
-        document.addEventListener('DOMContentLoaded', fetchFaqs);
+        document.addEventListener('DOMContentLoaded', () => {
+            // Cek session jika admin sebelumnya sudah login
+            if(sessionStorage.getItem('faq_user')) {
+                isAdmin = true;
+                document.getElementById('adminPanel').classList.remove('hidden');
+            }
+            fetchFaqs();
+        });
 
-        // Fetch Data dari Google Sheets
+        // Format teks bold di textarea
+        function insertBold(elementId) {
+            const textarea = document.getElementById(elementId);
+            const start = textarea.selectionStart;
+            const end = textarea.selectionEnd;
+            const text = textarea.value;
+            const selectedText = text.substring(start, end);
+            
+            const newText = text.substring(0, start) + '<b>' + selectedText + '</b>' + text.substring(end);
+            textarea.value = newText;
+            textarea.focus();
+            // Kembalikan kursor ke posisi yang tepat
+            textarea.selectionEnd = start + 3 + selectedText.length + 4; 
+        }
+
         async function fetchFaqs() {
             const statusDiv = document.getElementById('statusMessage');
             const faqContainer = document.getElementById('faqContainer');
             
             try {
-                if(GAS_URL.includes("ISI_DENGAN_URL")) {
-                    throw new Error("URL Backend belum diatur. Silakan baca panduan instalasi.");
-                }
-
+                if(GAS_URL.includes("ISI_DENGAN_URL")) throw new Error("URL Backend belum diatur.");
+                
                 const response = await fetch(GAS_URL);
                 const result = await response.json();
 
                 if (result.status === 'success') {
                     faqsData = result.data;
                     renderFaqs(faqsData);
-                    
                     statusDiv.classList.add('hidden');
                     faqContainer.classList.remove('hidden');
-                } else {
-                    throw new Error(result.message);
-                }
+                } else throw new Error(result.message);
             } catch (error) {
                 statusDiv.innerHTML = `<div class="text-red-500 bg-red-50 p-4 rounded-lg shadow"><i class="fas fa-exclamation-triangle mr-2"></i><b>Gagal memuat data:</b> ${error.message}</div>`;
             }
         }
 
-        // Render Data ke HTML Accordion
         function renderFaqs(data) {
             const container = document.getElementById('faqContainer');
-            
             if(data.length === 0) {
                 container.innerHTML = `<div class="text-center py-8 text-gray-500">Belum ada FAQ yang ditambahkan.</div>`;
                 return;
             }
 
-            container.innerHTML = data.map(faq => `
+            container.innerHTML = data.map(faq => {
+                // Menyusun blok Penyebab dan Solusi
+                let contentHTML = '';
+                if(faq.penyebab && faq.penyebab.trim() !== '') {
+                    contentHTML += `<div class="mb-3"><span class="font-bold text-gray-800">Penyebab:</span><br>${faq.penyebab}</div>`;
+                }
+                contentHTML += `<div><span class="font-bold text-gray-800">Solusi:</span><br>${faq.solusi}</div>`;
+
+                // Tombol Admin Edit & Delete (Hanya muncul jika login)
+                let adminControls = '';
+                if(isAdmin) {
+                    adminControls = `
+                    <div class="bg-gray-200 p-2 flex justify-end gap-3 border-t border-gray-300">
+                        <button onclick="editFaq('${faq.id}')" class="text-blue-700 hover:text-blue-900 bg-white px-3 py-1 rounded shadow-sm text-sm font-bold border border-blue-200"><i class="fas fa-edit mr-1"></i> Edit</button>
+                        <button onclick="deleteFaq('${faq.id}')" class="text-red-700 hover:text-red-900 bg-white px-3 py-1 rounded shadow-sm text-sm font-bold border border-red-200"><i class="fas fa-trash mr-1"></i> Hapus</button>
+                    </div>`;
+                }
+
+                return `
                 <details class="group bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
                     <summary class="flex justify-between items-center font-medium cursor-pointer list-none p-5 text-gray-800 hover:bg-blue-50 transition-colors">
                         <span class="text-lg font-semibold pr-4 leading-relaxed">${faq.pertanyaan}</span>
-                        <span class="transition group-open:rotate-180 bg-blue-100 text-muha-blue rounded-full p-2">
+                        <span class="transition group-open:rotate-180 bg-blue-100 text-muha-blue rounded-full p-2 w-8 h-8 flex items-center justify-center">
                             <i class="fas fa-chevron-down"></i>
                         </span>
                     </summary>
-                    <div class="text-gray-600 bg-gray-50 p-5 border-t border-gray-100 leading-relaxed text-base whitespace-pre-line">
-                        ${faq.solusi}
+                    <div class="faq-content text-gray-600 bg-gray-50 p-5 border-t border-gray-100 leading-relaxed text-base whitespace-pre-line">
+                        ${contentHTML}
                     </div>
-                </details>
-            `).join('');
+                    ${adminControls}
+                </details>`;
+            }).join('');
         }
 
-        // Fitur Pencarian Cerdas
         function filterFAQ() {
             const keyword = document.getElementById('searchInput').value.toLowerCase();
             const filteredData = faqsData.filter(faq => 
                 faq.pertanyaan.toLowerCase().includes(keyword) || 
+                (faq.penyebab && faq.penyebab.toLowerCase().includes(keyword)) ||
                 faq.solusi.toLowerCase().includes(keyword)
             );
             renderFaqs(filteredData);
@@ -190,8 +246,7 @@
         // --- SISTEM ADMIN ---
 
         function promptLogin() {
-            if (isAdmin) return; // Jika sudah login
-            
+            if (isAdmin) return;
             const user = prompt("Masukkan Username Admin:");
             if (!user) return;
             const pass = prompt("Masukkan Password:");
@@ -199,20 +254,12 @@
 
             if (user === "adminspemda" && pass === "spemda1945") {
                 isAdmin = true;
-                document.getElementById('adminPanel').classList.remove('hidden');
-                
-                // Set credentials di sessionStorage
                 sessionStorage.setItem('faq_user', user);
                 sessionStorage.setItem('faq_pass', pass);
-                
-                // Scroll ke bawah dengan delay sedikit agar UI sempat render
-                setTimeout(() => {
-                    window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
-                }, 100);
-                
-            } else {
-                alert("Username atau Password salah!");
-            }
+                document.getElementById('adminPanel').classList.remove('hidden');
+                renderFaqs(faqsData); // Re-render untuk memunculkan tombol edit/hapus
+                setTimeout(() => window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' }), 100);
+            } else alert("Username atau Password salah!");
         }
 
         function logoutAdmin() {
@@ -220,54 +267,101 @@
             sessionStorage.removeItem('faq_user');
             sessionStorage.removeItem('faq_pass');
             document.getElementById('adminPanel').classList.add('hidden');
+            cancelEdit();
+            renderFaqs(faqsData); // Re-render untuk menyembunyikan tombol edit/hapus
             alert("Berhasil Logout dari Panel Admin.");
         }
 
-        // Submit FAQ baru ke Backend
+        // Mengisi form untuk Update
+        function editFaq(id) {
+            const faq = faqsData.find(f => f.id === id);
+            if(!faq) return;
+
+            document.getElementById('editFaqId').value = faq.id;
+            document.getElementById('inputPertanyaan').value = faq.pertanyaan;
+            document.getElementById('inputPenyebab').value = faq.penyebab || '';
+            document.getElementById('inputSolusi').value = faq.solusi;
+
+            document.getElementById('formTitle').innerHTML = '<i class="fas fa-edit mr-2"></i>Panel Admin: Edit FAQ';
+            document.getElementById('btnSubmit').innerHTML = 'Update FAQ';
+            document.getElementById('btnCancelEdit').classList.remove('hidden');
+            
+            // Scroll ke form
+            document.getElementById('adminPanel').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function cancelEdit() {
+            document.getElementById('formFaq').reset();
+            document.getElementById('editFaqId').value = '';
+            document.getElementById('formTitle').innerHTML = '<i class="fas fa-tools mr-2"></i>Panel Admin: Tambah FAQ';
+            document.getElementById('btnSubmit').innerHTML = 'Simpan FAQ ke Database';
+            document.getElementById('btnCancelEdit').classList.add('hidden');
+            document.getElementById('adminNotif').classList.add('hidden');
+        }
+
+        // Hapus FAQ
+        async function deleteFaq(id) {
+            if(!confirm("Apakah Anda yakin ingin menghapus FAQ ini?")) return;
+
+            try {
+                const user = sessionStorage.getItem('faq_user');
+                const pass = sessionStorage.getItem('faq_pass');
+                
+                const response = await fetch(GAS_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({ action: 'deleteFAQ', id: id, username: user, password: pass })
+                });
+                
+                const result = await response.json();
+                if(result.status === 'success') {
+                    alert("FAQ Berhasil dihapus");
+                    fetchFaqs(); // Refresh data
+                } else throw new Error(result.message);
+            } catch (error) {
+                alert("Gagal menghapus: " + error.message);
+            }
+        }
+
+        // Submit FAQ (Bisa Add Baru atau Update)
         async function submitFaq(e) {
             e.preventDefault();
             const btn = document.getElementById('btnSubmit');
             const notif = document.getElementById('adminNotif');
             
-            const pertanyaan = document.getElementById('inputPertanyaan').value;
-            const solusi = document.getElementById('inputSolusi').value;
-            const user = sessionStorage.getItem('faq_user');
-            const pass = sessionStorage.getItem('faq_pass');
+            const idToEdit = document.getElementById('editFaqId').value;
+            const actionType = idToEdit ? 'updateFAQ' : 'addFAQ';
+            
+            const payload = {
+                action: actionType,
+                id: idToEdit, // Hanya terpakai jika updateFAQ
+                username: sessionStorage.getItem('faq_user'),
+                password: sessionStorage.getItem('faq_pass'),
+                pertanyaan: document.getElementById('inputPertanyaan').value,
+                penyebab: document.getElementById('inputPenyebab').value,
+                solusi: document.getElementById('inputSolusi').value
+            };
 
             btn.disabled = true;
             btn.innerHTML = `<div class="loader mr-2" style="width:20px;height:20px;border-width:3px;border-top-color:#fff;"></div> Menyimpan...`;
             notif.classList.add('hidden');
 
             try {
-                const response = await fetch(GAS_URL, {
-                    method: 'POST',
-                    body: JSON.stringify({
-                        action: 'addFAQ',
-                        username: user,
-                        password: pass,
-                        pertanyaan: pertanyaan,
-                        solusi: solusi
-                    })
-                });
-
+                const response = await fetch(GAS_URL, { method: 'POST', body: JSON.stringify(payload) });
                 const result = await response.json();
 
                 if(result.status === 'success') {
                     notif.className = "mt-4 p-3 rounded text-center font-bold bg-green-100 text-green-700 block";
-                    notif.innerText = "Berhasil! FAQ telah ditambahkan.";
-                    document.getElementById('formAddFaq').reset();
-                    
-                    fetchFaqs();
-                } else {
-                    throw new Error(result.message);
-                }
+                    notif.innerText = idToEdit ? "Berhasil! FAQ telah diperbarui." : "Berhasil! FAQ telah ditambahkan.";
+                    cancelEdit(); // Reset form ke mode tambah
+                    fetchFaqs();  // Refresh data
+                } else throw new Error(result.message);
 
             } catch (error) {
                 notif.className = "mt-4 p-3 rounded text-center font-bold bg-red-100 text-red-700 block";
                 notif.innerText = "Gagal: " + error.message;
             } finally {
                 btn.disabled = false;
-                btn.innerHTML = `Simpan FAQ ke Database`;
+                btn.innerHTML = idToEdit ? `Update FAQ` : `Simpan FAQ ke Database`;
             }
         }
     </script>
